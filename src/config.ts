@@ -21,8 +21,8 @@ import { getTranslateLanguageFromConfig } from "./utils/language-utils";
 const SITE_LANG = "zh_CN"; // 语言代码，例如：'en', 'zh_CN', 'ja' 等。
 
 export const siteConfig: SiteConfig = {
-	title: "Mizuki",
-	subtitle: "One demo website",
+	title: "翊森's Blog",
+	subtitle: "Blog",
 
 	lang: SITE_LANG,
 
@@ -81,13 +81,10 @@ export const siteConfig: SiteConfig = {
 
 		homeText: {
 			enable: true, // 在主页显示自定义文本
-			title: "Beautiful Mizuki!", // 主页横幅主标题
+			title: "翊森's Home", // 主页横幅主标题
 
 			subtitle: [
-				"A Showcase Demo Site",
-				"Carousel Highlight: Innovation",
-				"Carousel Focus: User Experience",
-				"Carousel Spot: Core Advantages",
+				"记录来时的路"
 			],
 			typewriter: {
 				enable: true, // 启用副标题打字机效果
@@ -164,36 +161,10 @@ export const navBarConfig: NavBarConfig = {
 			children: [
 				{
 					name: "GitHub",
-					url: "https://github.com/matsuzaka-yuki/Mizuki",
+					url: "https://github.com/wuou-learn/Mizuki",
 					external: true,
 					icon: "fa6-brands:github",
-				},
-				{
-					name: "Bilibili",
-					url: "https://space.bilibili.com/701864046",
-					external: true,
-					icon: "fa6-brands:bilibili",
-				},
-				{
-					name: "Gitee",
-					url: "https://gitee.com/matsuzakayuki/Mizuki",
-					external: true,
-					icon: "mdi:git",
-				},
-			],
-		},
-		{
-			name: "我的",
-			url: "/content/",
-			icon: "material-symbols:person",
-			children: [
-				LinkPreset.Anime,
-				LinkPreset.Diary,
-				{
-					name: "相册",
-					url: "/albums/",
-					icon: "material-symbols:photo-library",
-				},
+				}
 			],
 		},
 		{
@@ -229,23 +200,13 @@ export const navBarConfig: NavBarConfig = {
 
 export const profileConfig: ProfileConfig = {
 	avatar: "assets/images/avatar.gif", // 相对于 /src 目录。如果以 '/' 开头，则相对于 /public 目录
-	name: "Mizuki",
-	bio: "世界很大,一定要去看看",
+	name: "翊森",
+	bio: "",
 	links: [
-		{
-			name: "Bilibli",
-			icon: "fa6-brands:bilibili",
-			url: "https://space.bilibili.com/701864046",
-		},
-		{
-			name: "Gitee",
-			icon: "mdi:git",
-			url: "https://gitee.com/matsuzakayuki",
-		},
 		{
 			name: "GitHub",
 			icon: "fa6-brands:github",
-			url: "https://github.com/matsuzaka-yuki",
+			url: "https://github.com/wuou-learn",
 		},
 	],
 	// Umami统计部份，记得在layout插入Umami的head标签
@@ -277,7 +238,7 @@ export const commentConfig: CommentConfig = {
 
 export const announcementConfig: AnnouncementConfig = {
 	title: "公告", // 公告标题
-	content: "欢迎来到我的博客！这是一个示例公告。", // 公告内容
+	content: "欢迎来到我的博客", // 公告内容
 	closable: true, // 允许用户关闭公告
 	link: {
 		enable: true, // 启用链接

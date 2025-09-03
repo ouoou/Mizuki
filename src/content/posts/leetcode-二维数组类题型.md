@@ -138,7 +138,7 @@ A = (2,6),  B1 = (4,4),  B2 = (6,2)
 
 ---
 
-## 优化java解法
+## 优化java解法/同3027解法
 
 ```java
 public int numberOfPairs(int[][] points) {

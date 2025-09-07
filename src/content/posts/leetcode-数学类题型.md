@@ -11,6 +11,30 @@ category: Leetcode
 draft: false
 ---
 
+# Leetcode 1304
+
+## 题目回顾
+给你一个整数 n，请你返回 任意 一个由 n 个 各不相同 的整数组成的数组，并且这 n 个数相加和为 0 。
+
+## java解法
+
+```java
+class Solution {
+    public int[] sumZero(int n) {
+        int [] res = new int[n];
+        int idx = 0;
+        for (int i = 1; i <= n / 2; i++) {
+            res[idx++] = i;
+            res[idx++] = -i;
+        }
+        if (n % 2 == 1) {
+            res[idx] = 0;
+        }
+        return res;
+    }
+}
+```
+
 # Leetcode 2749
 
 ## 题意回顾

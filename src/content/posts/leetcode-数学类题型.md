@@ -35,6 +35,42 @@ class Solution {
 }
 ```
 
+# Leetcode 1317
+
+## 题意回顾
+「无零整数」是十进制表示中 不含任何 0 的正整数。
+
+给你一个整数 n，请你返回一个 由两个整数组成的列表 [a, b]，满足：
+
+a 和 b 都是无零整数
+a + b = n
+题目数据保证至少有一个有效的解决方案。
+
+如果存在多个有效解决方案，你可以返回其中任意一个。
+
+## java暴力
+```java
+class Solution {
+    public int[] getNoZeroIntegers(int n) {
+        for (int a = 1; a <= n; a++) {
+            int b = n - a;
+            if (isValid(a) && isValid(b)) {
+                return new int[]{a,b};
+            }
+        }
+        return null;
+    }
+    public boolean isValid(int n) {
+        while (n != 0) {
+            if (n % 10 == 0) return false;
+            n /= 10;
+        }
+        return true;
+    }
+}
+```
+
+
 # Leetcode 2749
 
 ## 题意回顾

@@ -551,6 +551,77 @@ class Solution {
 }
 ```
 
+# Leetcode 1371
+
+## 题目回顾
+给你一个字符串 s ，请你返回满足以下条件的最长子字符串的长度：每个元音字母，即 'a'，'e'，'i'，'o'，'u' ，在子字符串中都恰好出现了偶数次。
+
+
+示例 1：
+
+输入：s = "eleetminicoworoep"
+输出：13
+解释：最长子字符串是 "leetminicowor" ，它包含 e，i，o 各 2 个，以及 0 个 a，u 。
+
+## 思路解析
+
+### 位运算
+
+A/E/I/O/U 设每一位字母都占一位, 对1进行异或运算，运算后为0 则认为该字母出现了偶数次
+
+hash表存好每一次上次出现时的索引取最大值
+prefix[j] ^ prefix[i] 实际上就是区间 (i+1, j] 内元音出现次数的奇偶性。
+既然结果为 00000，说明：
+
+在 (i+1, j] 这个区间里，5 个元音的出现次数都变回了偶数。
+
+所以这个区间是一个合法的子串。
+## 例子
+
+字符串 "eleetminicoworoep"
+
+遍历到第 1 个字符 'e' → state = 00010
+
+遍历到第 4 个字符 't' → state 又变回 00010
+
+说明在区间 (1, 4] = "leet" 里：
+
+e 出现了 2 次（偶数次）
+
+其他元音出现了 0 次（偶数次）
+
+所以 "leet" 是合法子串。
+
+## java解法
+```java
+class Solution {
+    public int findTheLongestSubstring(String s) {
+        // (sum[j] - sum[i]) % 2 == 0;
+        // sum[i] % 2 == sum[j] % 2
+        Map<Integer, Integer> map = new HashMap<>();
+        map.put(0, -1);
+        int ans = 0;
+        int state = 0;
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c == 'a') state ^= 1 << 0;
+            if (c == 'e') state ^= 1 << 1;
+            if (c == 'i') state ^= 1 << 2;
+            if (c == 'o') state ^= 1 << 3;
+            if (c == 'u') state ^= 1 << 4;
+
+            if (map.containsKey(state)) {
+                ans = Math.max(ans, i - map.get(state));
+            } else {
+                map.put(state, i);
+            }
+        }
+        return ans;
+
+    }
+}
+```
+
 # leetcode 1124
 
 ---
@@ -750,3 +821,4 @@ class Solution {
     }
 }
 ```
+

@@ -333,7 +333,7 @@ class Solution {
 }
 ```
 
-# Leetcode 560
+# Leetcode 560/930
 
 ## 题目简述
 

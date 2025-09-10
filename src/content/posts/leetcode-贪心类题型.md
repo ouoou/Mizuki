@@ -256,3 +256,124 @@ $$
       → 注意这里 `(S+1)/2` 在 S 偶数时会多算 1
 
 ---
+
+# leetcode 1733
+
+## 暴力思路
+
+遍历所有语言 L（假设一共有 m 种语言）。
+
+对于每一对好友 (u, v)：
+
+如果他们已经能交流 → 跳过；
+
+如果不能交流 → 那么至少 u 或 v 中有人要学语言 L。
+
+对于所有不能交流的好友，把涉及的人标记下来：
+
+如果该人不会语言 L → 他就需要被教。
+
+统计需要被教的人数，作为当前语言 L 的代价。
+
+所有语言里，取最小代价作为答案。
+
+## java暴力解法
+
+```java
+class Solution {
+    public int minimumTeachings(int n, int[][] languages, int[][] friendships) {
+        int mu = languages.length;
+        List<Set<Integer>> userKnows = new ArrayList<>();
+        for (int i = 0; i < mu; i++) {
+            Set<Integer> know = new HashSet<>();
+            for (int l : languages[i]) {
+                know.add(l);
+            }
+            userKnows.add(know);
+        }
+
+        int ans = mu;
+        for (int i = 1; i <= n; i++) {
+            HashSet<Integer> needTeach = new HashSet<>();
+            for (int[] friends : friendships) {
+                int friend1 = friends[0];
+                int friend2 = friends[1];
+                Set<Integer> friend1Languages = userKnows.get(friend1 - 1);
+                Set<Integer> friend2Languages = userKnows.get(friend2 - 1);
+                if (friend1Languages.stream().anyMatch(friend2Languages::contains)) {
+                    continue;
+                }
+                if (!friend1Languages.contains(i)) {
+                    needTeach.add(friend1);
+                }
+                if (!friend2Languages.contains(i)) {
+                    needTeach.add(friend2);
+                }
+            }
+            ans = Math.min(ans, needTeach.size());
+        }
+        return ans;
+    }
+}
+```
+## 优化思路
+
+把每个人会的语言存成集合 know[i]（i 0-based）。同时记录语言编号的上界 m（或用 map）以便计数。
+
+遍历每个好友对 (u,v)（输入是 1-based，先减 1）：
+
+如果 know[u] 与 know[v] 有交集 → 他们能交流，跳过。
+
+否则把 u 和 v 加入 conflictPeople（集合 S）。
+
+如果 S 为空，答案 0（所有好友对都能交流）。
+
+对 S 中的每个人 p，遍历 know[p]，统计 cnt[lang]++。
+
+找到 maxCnt = max_L cnt[L]，答案 = |S| - maxCnt。
+
+直观：选那门语言能覆盖最多冲突人群中的已知员，剩下要教的人最少。
+
+## java贪心优化
+
+```java
+class Solution {
+    public int minimumTeachings(int n, int[][] languages, int[][] friendships) {
+        List<HashSet<Integer>> userKnows = new ArrayList<>();
+        int ml = 0;
+        for (int[] ls : languages) {
+            HashSet<Integer> knows = new HashSet<>();
+            for (int l : ls) {
+                knows.add(l);
+                ml = Math.max(ml, l);
+            }
+            userKnows.add(knows);
+        }
+        HashSet<Integer> c = new HashSet<>();
+        for (int [] fs : friendships) {
+            int a = fs[0];
+            int b = fs[1];
+            HashSet<Integer> aKnows = userKnows.get(a - 1);
+            HashSet<Integer> bKnows = userKnows.get(b - 1);
+            if (aKnows.stream().noneMatch(bKnows::contains)) {
+                c.add(a);
+                c.add(b);
+            }
+        }
+        if (c.isEmpty()) return 0;
+        int [] cnt = new int[ml + 1];
+        for (Integer user : c) {
+            HashSet<Integer> knows = userKnows.get(user - 1);
+            for (Integer l : knows) {
+                cnt[l]++;
+            }
+        }
+
+        int ans = Integer.MAX_VALUE;
+        for (int i = 1; i <= ml; i++) {
+            ans = Math.min(ans, c.size() - cnt[i]);
+        }
+        return ans;
+    }
+}
+```

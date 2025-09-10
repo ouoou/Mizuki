@@ -551,6 +551,218 @@ class Solution {
 }
 ```
 
+
+# leetcode 1590
+
+## 题目回顾
+给你一个正整数数组 nums，请你移除 最短 子数组（可以为 空），使得剩余元素的 和 能被 p 整除。 不允许 将整个数组都移除。
+
+请你返回你需要移除的最短子数组的长度，如果无法满足题目要求，返回 -1 。
+
+子数组 定义为原数组中连续的一组元素。
+
+示例 1：
+
+输入：nums = [3,1,4,2], p = 6
+输出：1
+解释：nums 中元素和为 10，不能被 p 整除。我们可以移除子数组 [4] ，剩余元素的和为 6 。
+
+## java暴力解法
+```java
+class Solution {
+    public int minSubarray(int[] nums, int p) {
+        // sum[i] - (prefix[i] - prefix[j]) % p == 0
+        long sum = 0;
+        for (int i = 0; i < nums.length; i++) {
+            sum += nums[i];
+        }
+        if (sum % p == 0) {
+            return 0;
+        }
+        int ans = Integer.MAX_VALUE;
+        for (int i = 0; i < nums.length; i++) {
+            long t = sum - nums[i];
+            if (t % p == 0 && t != 0) {
+                return 1;
+            }
+            for (int j = i + 1; j < nums.length; j++) {
+                t -= nums[j];
+                if (t % p == 0 && t != 0) {
+                    ans = Math.min(ans, j - i + 1);
+                }
+            }
+        }
+        return ans == Integer.MAX_VALUE ? -1 : ans;
+    }
+}
+```
+
+## 前缀和优化思路
+
+### 公式推导
+
+需要得到``(sum[i] - (prefix[i] - prefix[j])) % p == 0``
+```shell
+(sum[i] - (prefix[r] - prefix[l - 1])) % p == 0
+sum % p = (prefix[r] - prefix[l - 1]) % p
+设 mod = sum % p
+mod = (prefix[r] - prefix[l - 1]) % p
+mod = prefix[r] % p - prefix[l - 1] % p
+prefix[l - 1] % p = prefix[r] % p - mod
+prefix[l - 1] % p = prefix[r] % p - (sum % p)
+根据欧几里得除法可得 sum = q*p + mod
+prefix[l - 1] % p = prefix[r] % p - (q*p + mod) % p
+prefix[l - 1] % p = prefix[r] % p - (mod) % p
+```
+
+### 要转换成什么问题？
+
+这一步其实很关键：
+
+### 原问题
+
+要删除一个子数组 `[l..r]`，使得**删除后总和能被 p 整除**。
+
+### 转换后问题
+
+找到一对下标 `(i, r)` （其中 `i = l-1`），满足：
+
+$$
+prefix[i] \equiv prefix[r] - target \pmod p
+$$
+
+这意味着：
+
+* 我们遍历到位置 `r` 时，只要能找到一个之前的 `prefix[i]`，它模 p 以后等于 `(prefix[r] - target + p) % p`，那么 `[i+1..r]` 就是可删子数组。
+
+换句话说：
+👉 **问题转化成「在前缀和的模数组中找一对下标，满足特定的同余关系」。**
+
+---
+
+### 为什么是(curMod - mod + p) % p; 而不是和公式一致的 (curMod - mod) % p
+
+#### 1. 问题来源
+
+假设：
+
+```java
+cur = prefix[r] % p
+t   = totalSum % p
+```
+
+我们要计算：
+
+$$
+need = (prefix[r] - t) \bmod p
+$$
+
+直接写 `(cur - t) % p` 有个问题：
+
+* 在 Java 中，`%` 运算符对 **负数**不会返回 `[0, p-1]`，而是返回负数。
+* 例如：
+
+```java
+(-3) % 7 == -3   // 不是 4
+```
+
+但是我们希望余数在 `[0, p-1]` 之间。
+
+---
+
+#### 2. 解决方法
+
+**加上 p 再取模**：
+
+$$
+(cur - t + p) \% p
+$$
+
+为什么可行？
+
+* 如果 `cur - t >= 0`：`cur - t + p >= p`，`% p` 会自动得到 `cur - t`（原本非负没影响）
+* 如果 `cur - t < 0`：`cur - t + p >= 0`，再 `% p` 就得到正确的非负余数
+
+---
+
+#### 3. 数学解释
+
+模运算中：
+
+$$
+a \bmod p \in [0, p-1]
+$$
+
+但在 Java 中：
+
+$$
+(-3) \% 7 = -3
+$$
+
+所以为了让结果始终落在 `[0, p-1]`，做了如下处理：
+
+$$
+need = (cur - t + p) \% p
+$$
+
+* 如果 `cur - t >= 0` → `(cur - t + p) % p = cur - t` ✅
+* 如果 `cur - t < 0` → `(cur - t + p) % p = cur - t + p` ✅
+
+保证了 `need` **非负**，可以直接查 `map`。
+
+---
+
+#### 4. 总结一句话
+
+**`+p` 是为了处理负数情况，保证余数在 `[0, p-1]` 范围内**，这是写模运算时常用的技巧。
+
+---
+
+## 优化后代码
+
+```java
+class Solution {
+    public int minSubarray(int[] nums, int p) {
+        long sum = 0;
+        for (int i = 0; i < nums.length; i++) {
+            sum += nums[i];
+        }
+        long mod = sum % p;
+        if (mod == 0) {
+            return 0;
+        }
+        int ans = nums.length;
+
+        // (sum[i] - (prefix[i] - prefix[j])) % p == 0
+        // sum % p = (prefix[i] - prefix[j]) % p
+        // 设 mod = sum % p
+        // mod = (prefix[r] - prefix[l - 1]) % p
+        // mod = prefix[r] % p - prefix[l - 1] % p
+        // prefix[l - 1] % p = prefix[r] % p - mod
+        // prefix[l - 1] % p = prefix[r] % p - (sum % p)
+        // prefix[l - 1] % p = (prefix[r] - sum) % p
+        // 根据欧几里得除法可得 sum = q*p + mod
+        // prefix[l - 1] % p = (prefix[r] - (q*p + mod)) % p
+        // prefix[l - 1] % p = (prefix[r] - mod) % p
+        Map<Long, Integer> map = new HashMap<>();
+        map.put(0L, -1);
+        long prefix = 0;
+        for (int i = 0; i < nums.length; i++) {
+            prefix += nums[i];
+            long curMod = prefix % p;
+            long need = (curMod - mod + p) % p;
+            if (map.containsKey(need)) {
+                ans = Math.min(ans, i - map.get(need));
+            }
+            map.put(curMod, i);
+        }
+        return ans == nums.length ? -1 : ans;
+    }
+}
+```
+
+---
+
 # Leetcode 1371
 
 ## 题目回顾
@@ -821,4 +1033,3 @@ class Solution {
     }
 }
 ```
-

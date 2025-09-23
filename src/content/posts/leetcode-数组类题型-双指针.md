@@ -1,5 +1,5 @@
 ---
-title: Leetcode-数组类题型-遍历
+title: Leetcode-数组类题型-双指针
 published: 2025-09-23
 updated: 2025-09-23
 description: ""

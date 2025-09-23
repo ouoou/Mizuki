@@ -126,3 +126,72 @@ class Solution {
     }  
 }
 ```
+
+
+# Leetcode 151
+
+## java（split遍历）
+
+```java
+class Solution {  
+    public String reverseWords(String s) {  
+        String[] split = s.split(" ");  
+        StringBuilder ans = new StringBuilder();  
+        for (int i = split.length - 1; i >= 0; i--) {  
+            if (Objects.equals(split[i], "")) {  
+                continue;  
+            }  
+            ans.append(split[i]);  
+            ans.append(" ");  
+        }  
+        return ans.substring(0, ans.length() - 1);  
+    }  
+}
+```
+## java（双指针）
+
+```java
+class Solution {  
+    public String reverseWords(String s) {  
+        int n = s.length();  
+        int r = n - 1, l = r;  
+        StringBuilder ans = new StringBuilder();  
+        while (r >= 0) {  
+            while (r >= 0 && s.charAt(r) == ' ') {  
+                r--;  
+            }  
+            if (r < 0) break; // 说明处理完了  
+  
+            l = r;  
+            while (l >= 0 && s.charAt(l) != ' ') {  
+                l--;  
+            }  
+            ans.append(s.substring(l + 1, r + 1));  
+            ans.append(" ");  
+            r = l;  
+        }  
+        return ans.substring(0, ans.length() - 1);  
+    }  
+}
+```
+
+# Leetcode26
+
+## java解法（双指针）
+
+```java
+class Solution {  
+    public int removeDuplicates(int[] nums) {  
+        int idx = 0;  
+        int last = nums[idx++];  
+        for (int i = 1; i < nums.length; i++) {  
+            if (last == nums[i]) {  
+                continue;  
+            }  
+            nums[idx++] = nums[i];  
+            last = nums[i];  
+        }  
+        return idx;  
+    }  
+}
+```

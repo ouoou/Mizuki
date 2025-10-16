@@ -171,7 +171,7 @@ sum:  0  -1   0   1   2   3   4   3   2   1
 在前缀和曲线上，**“相同高度的两个点之间”** 的区间，表示这段子数组的和为 0 ⇒ 0 和 1 个数相等。
 
 ---
-![img.png](guide/leetcode525.png)
+![img.png](../guide/leetcode525.png)
 
 ## java解法
 ```java

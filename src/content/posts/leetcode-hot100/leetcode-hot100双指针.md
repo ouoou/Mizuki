@@ -143,3 +143,93 @@ class Solution {
     }
 }
 ```
+
+# leetcode 42
+---
+## 思路
+
+
+> **水量由短板决定，移动短板指针，用左/右最大高度计算当前格能装多少水。**
+
+---
+
+### 🧠 思维模型：
+
+1️⃣ **装水规律公式**
+某个格子能装的水量 = `min(左边最高, 右边最高) - 当前高度`
+
+> 这意味着左右两边都要有“墙”，并且取短的那一边决定水位。
+
+2️⃣ **双指针思想**
+
+* 左右指针从两端往中间走。
+* 每次看 `height[l]` 和 `height[r]` 哪个更短。
+
+    * 谁短，谁那一侧的水位就可以确定（因为“短板”决定水量）。
+    * 处理完它后往中间移动。
+
+3️⃣ **贪心安全性**
+
+* 当左边更短时：右边肯定有一个比它高的挡墙（`height[r]`），
+  所以当前左格能装多少水只与左侧最高 `leftMax` 有关。
+* 同理，当右边更短时，就可以放心计算右格。
+
+---
+
+### 🧩 模板步骤
+
+1. 初始化：
+
+   ```
+   l = 0, r = n - 1
+   leftMax = 0, rightMax = 0, ans = 0
+   ```
+
+2. while (l < r):
+
+    * 如果左边短 (`height[l] < height[r]`):
+
+        * 若当前高度 ≥ leftMax → 更新 leftMax
+        * 否则 → 加入 `leftMax - height[l]` 的水量
+        * 然后 l++
+    * 否则（右边短）：
+
+        * 若当前高度 ≥ rightMax → 更新 rightMax
+        * 否则 → 加入 `rightMax - height[r]` 的水量
+        * 然后 r--
+
+3. 返回 ans。
+
+---
+
+## java解法
+
+```java
+class Solution {
+    public int trap(int[] height) {
+        int l = 0;
+        int r = height.length - 1;
+        int lm = height[l];
+        int rm = height[r];
+        int ans = 0;
+        while (l < r) {
+            if (height[l] <= height[r]) {
+                if (height[l] >= lm) {
+                    lm = Math.max(height[l], lm);
+                } else {
+                    ans += lm - height[l];
+                }
+                l++;
+            } else {
+                if (height[r] >= rm) {
+                    rm = Math.max(height[r], rm);
+                } else {
+                    ans += rm - height[r];
+                }
+                r--;
+            }
+        }
+        return ans;
+    }
+}
+```

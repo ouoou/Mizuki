@@ -7,6 +7,7 @@ image: ""
 tags:
   - hot100
   - 子串
+  - 滑动窗口
 category: Leetcode
 draft: false
 ---
@@ -160,3 +161,254 @@ class Solution {
     }
 }
 ```
+
+
+# leetcode 76
+
+## 🧠 核心思路
+
+这题的关键在于维护一个**动态窗口 [l, r]**，使得：
+
+* 窗口中的字符能**覆盖 t 的所有字符**；
+* 并且在满足条件的情况下**尽量缩小窗口**，从而找到最短结果。
+
+---
+
+## 🚀 解题步骤
+
+### 1️⃣ 准备工作
+
+我们需要统计 `t` 中每个字符的出现次数：
+
+```java
+Map<Character, Integer> need = new HashMap<>();
+for (char c : t.toCharArray()) {
+    need.put(c, need.getOrDefault(c, 0) + 1);
+}
+```
+
+`need` 表示“还需要多少个该字符”。
+
+---
+
+### 2️⃣ 移动右指针扩张窗口
+
+右指针 `r` 从左到右遍历 `s`：
+
+* 把当前字符加入窗口计数；
+* 如果该字符是需要的字符，并且窗口中此字符数量刚好满足需求，则说明有一个字符被“匹配上”。
+
+---
+
+### 3️⃣ 当窗口满足条件后，移动左指针收缩窗口
+
+当当前窗口中已经包含了 `t` 的所有字符时（可以用一个 `valid` 计数器判断）：
+
+* 不断移动左指针 `l`，尝试缩小窗口；
+* 只要还满足条件，就更新最小子串结果；
+* 一旦不满足条件，停止收缩，继续右移 `r` 扩张。
+
+---
+
+### 4️⃣ 判断窗口是否满足条件
+
+可以用一个计数变量 `valid` 来记录当前窗口中**满足条件的字符种类数**：
+
+* 当窗口中一个字符的数量等于 `t` 中的数量时，`valid++`
+* 当数量减少后不再匹配时，`valid--`
+* 当 `valid == need.size()` 时，说明窗口已覆盖全部字符。
+
+---
+
+## java解法
+
+```java
+class Solution {
+    public String minWindow(String s, String t) {
+        Map<Character, Integer> map = new HashMap<>();
+        for (Character c : t.toCharArray()) {
+            map.put(c, map.getOrDefault(c, 0) + 1);
+        }
+        Map<Character, Integer> windows = new HashMap<>();
+        int l = 0, r = 0;
+        int v = 0;
+        int len = Integer.MAX_VALUE;
+        int start = 0;
+        while (r < s.length()) {
+            char c = s.charAt(r);
+            r++;
+            if (map.containsKey(c)) {
+                windows.put(c, windows.getOrDefault(c, 0) + 1);
+                if (map.get(c).equals(windows.get(c))) {
+                    v++;
+                }
+            }
+            while (v == map.size()) {
+                if (r - l < len) {
+                    start = l;
+                    len = r - l;
+                }
+                char temp = s.charAt(l);
+                l++;
+                if (map.containsKey(temp)) {
+                    if (map.get(temp).equals(windows.get(temp))) {
+                        v--;
+                    }
+                    windows.put(temp, windows.getOrDefault(temp, 0) - 1);
+                }
+            }
+        }
+        return len == Integer.MAX_VALUE ? "" : s.substring(start, start + len);
+    }
+}
+```
+
+
+
+# 滑动窗口解题模板套路汇总
+
+---
+
+## 🧭 三、常见问题类型与模板扩展方式
+
+| 类型              | 判断逻辑位置                      | 示例              |
+| --------------- | --------------------------- | --------------- |
+| ✅ **固定窗口长度**    | 当 `right - left == k` 时处理窗口 | 子数组平均值问题        |
+| ✅ **窗口内元素唯一**   | 当 `window.get(c) > 1` 时缩小窗口 | Leetcode 3      |
+| ✅ **窗口内满足约束**   | 当 `sum > target` 时缩小        | 连续子数组和问题        |
+| ✅ **窗口内出现次数匹配** | 当 `window` 与 `need` 一致时更新   | Leetcode 438、76 |
+| ✅ **最多K种字符**    | 当 `window.size() > K` 时缩小   | Leetcode 340    |
+
+---
+
+## 💻 四、五种典型模式的通用模板化写法
+
+### ① 固定窗口大小（长度为 k）
+
+```java
+int left = 0, right = 0;
+while (right < s.length()) {
+    // 加入右边元素
+    char c = s.charAt(right);
+    right++;
+
+    // 保持窗口大小为 k
+    if (right - left > k) {
+        char d = s.charAt(left);
+        left++;
+    }
+
+    // 窗口大小刚好为 k 时进行逻辑处理
+    if (right - left == k) {
+        // process(window)
+    }
+}
+```
+
+---
+
+### ② 无重复字符的最长子串
+
+```java
+Map<Character, Integer> window = new HashMap<>();
+int left = 0, right = 0, maxLen = 0;
+
+while (right < s.length()) {
+    char c = s.charAt(right++);
+    window.put(c, window.getOrDefault(c, 0) + 1);
+
+    while (window.get(c) > 1) { // 出现重复
+        char d = s.charAt(left++);
+        window.put(d, window.get(d) - 1);
+    }
+    maxLen = Math.max(maxLen, right - left);
+}
+```
+
+---
+
+### ③ 最多 K 种不同字符的最长子串
+
+```java
+Map<Character, Integer> window = new HashMap<>();
+int left = 0, right = 0, maxLen = 0;
+
+while (right < s.length()) {
+    char c = s.charAt(right++);
+    window.put(c, window.getOrDefault(c, 0) + 1);
+
+    while (window.size() > K) { // 种类超出
+        char d = s.charAt(left++);
+        window.put(d, window.get(d) - 1);
+        if (window.get(d) == 0) window.remove(d);
+    }
+    maxLen = Math.max(maxLen, right - left);
+}
+```
+
+---
+
+### ④ 统计固定模式出现次数（如异位词匹配）
+
+```java
+Map<Character, Integer> need = new HashMap<>();
+Map<Character, Integer> window = new HashMap<>();
+for (char c : t.toCharArray()) {
+    need.put(c, need.getOrDefault(c, 0) + 1);
+}
+int left = 0, right = 0, valid = 0;
+List<Integer> res = new ArrayList<>();
+
+while (right < s.length()) {
+    char c = s.charAt(right++);
+    if (need.containsKey(c)) {
+        window.put(c, window.getOrDefault(c, 0) + 1);
+        if (window.get(c).equals(need.get(c))) valid++;
+    }
+
+    while (right - left >= t.length()) {
+        if (valid == need.size()) res.add(left);
+        char d = s.charAt(left++);
+        if (need.containsKey(d)) {
+            if (window.get(d).equals(need.get(d))) valid--;
+            window.put(d, window.get(d) - 1);
+        }
+    }
+}
+```
+
+---
+
+### ⑤ 数组滑动窗口（非字符串）
+
+```java
+int left = 0, right = 0;
+int windowSum = 0, maxSum = 0;
+while (right < nums.length) {
+    windowSum += nums[right++]; // 加入右边元素
+
+    while (right - left > k) { // 保持窗口大小
+        windowSum -= nums[left++];
+    }
+
+    if (right - left == k) {
+        maxSum = Math.max(maxSum, windowSum);
+    }
+}
+```
+
+---
+
+💡**一句话模板总结：**
+
+```java
+while (right < n) {
+    加入右边元素;
+    while (窗口不合法) {
+        移出左边元素;
+    }
+    更新结果;
+}
+```
+
+---

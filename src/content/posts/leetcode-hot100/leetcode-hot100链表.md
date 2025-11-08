@@ -731,3 +731,177 @@ class Solution {
 
 }
 ```
+
+
+# leetcode 138
+
+## java解法
+```java
+/*
+// Definition for a Node.
+class Node {
+    int val;
+    Node next;
+    Node random;
+
+    public Node(int val) {
+        this.val = val;
+        this.next = null;
+        this.random = null;
+    }
+}
+*/
+
+class Solution {
+    public Node copyRandomList(Node head) {
+        Map<Node, Node> map = new HashMap<>();
+        Node curr = head;
+        while (curr != null) {
+            map.put(curr, new Node(curr.val));
+            curr = curr.next;
+        }
+        curr = head;
+        while (curr != null) {
+            map.get(curr).next = map.get(curr.next);
+            map.get(curr).random = map.get(curr.random);
+            curr = curr.next;
+        }
+
+        return map.get(head);
+    }
+}
+```
+
+# leetcode 148
+
+## 🚀 一眼能记住的解题思路：**归并排序（Merge Sort）**
+
+> **核心思路一句话：**
+> 用快慢指针找到中点 → 断开链表 → 递归排序左右两半 → 合并有序链表。
+
+---
+
+### ✅ 步骤模板：
+
+1️⃣ **递归出口**
+
+```java
+if (head == null || head.next == null) return head;
+```
+
+2️⃣ **快慢指针找中点**
+
+```java
+ListNode slow = head;
+ListNode fast = head.next;
+while (fast != null && fast.next != null) {
+    slow = slow.next;
+    fast = fast.next.next;
+}
+```
+
+📌 `fast = head.next` 保证偶数长度链表分得更均匀。
+
+3️⃣ **断开链表**
+
+```java
+ListNode mid = slow.next;
+slow.next = null;
+```
+
+4️⃣ **递归排序左右两半**
+
+```java
+ListNode left = sortList(head);
+ListNode right = sortList(mid);
+```
+
+5️⃣ **合并有序链表（同 LeetCode 21）**
+
+```java
+ListNode dummy = new ListNode(-1);
+ListNode curr = dummy;
+while (left != null && right != null) {
+    if (left.val < right.val) {
+        curr.next = left;
+        left = left.next;
+    } else {
+        curr.next = right;
+        right = right.next;
+    }
+    curr = curr.next;
+}
+curr.next = (left != null) ? left : right;
+return dummy.next;
+```
+
+---
+
+## ⚠️ 容易错的关键点总结：
+
+| 🚫 错误点        | ❌ 错误示例                 | ✅ 正确做法                | 原因说明                |          |            |
+| ------------- | ---------------------- | --------------------- | ------------------- | -------- | ---------- |
+| 忘记递归出口        | 没有 `if (head == null   |                       | head.next == null)` | 加上递归终止条件 | 否则无限递归或空指针 |
+| `fast = head` | `fast = head;`         | ✅ `fast = head.next;` | 偶数长度时拆分不均匀          |          |            |
+| 忘记断开链表        | 缺少 `slow.next = null;` | ✅ 必须断开                | 不断开会导致合并时成环         |          |            |
+| 合并逻辑写错        | 直接用排序数组思维              | ✅ 用链表合并模板             | 链表不能随机访问，只能指针移动     |          |            |
+| 没考虑空链表        | head 可能是 null          | ✅ 递归出口涵盖              | 防止空指针异常             |          |            |
+
+---
+
+## java解法
+```java
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode() {}
+ *     ListNode(int val) { this.val = val; }
+ *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ * }
+ */
+class Solution {
+    public ListNode sortList(ListNode head) {
+        if (head == null || head.next == null) {
+            return head;
+        }
+        ListNode slow = head;
+        ListNode fast = head.next;
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        ListNode mid = slow.next;
+        slow.next = null;
+
+        ListNode left = sortList(head);
+        ListNode right = sortList(mid);
+
+        return merge(left, right);
+    }
+
+    public ListNode merge(ListNode left, ListNode right) {
+        ListNode dummy = new ListNode(-1);
+        ListNode curr = dummy;
+        while (left != null && right != null) {
+            if (left.val < right.val) {
+                curr.next = left;
+                left = left.next;
+            } else {
+                curr.next = right;
+                right = right.next;
+            }
+            curr = curr.next;
+        }
+        if (left != null) {
+            curr.next = left;
+        }
+        if (right != null) {
+            curr.next = right;
+        }
+
+        return dummy.next;
+    }
+}
+```

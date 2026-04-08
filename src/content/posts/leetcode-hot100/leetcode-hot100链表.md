@@ -186,6 +186,41 @@ class Solution {
 }
 ```
 
+## java解法(反转后半链表)
+```java
+class Solution {
+    public boolean isPalindrome(ListNode head) {
+        ListNode s = head;
+        ListNode f = head;
+        while (f != null && f.next != null) {
+            s = s.next;
+            f = f.next.next;
+        }
+        ListNode tail = reverse(s);
+        ListNode curr = head;
+        while (curr != null && tail != null) {
+            if (curr.val != tail.val) {
+                return false;
+            }
+            curr = curr.next;
+            tail = tail.next;
+        }
+        return true;
+    }
+    public ListNode reverse(ListNode head) {
+        ListNode curr = head;
+        ListNode prev = null;
+        while (curr != null) {
+            ListNode next = curr.next;
+            curr.next = prev;
+            prev = curr;
+            curr = next;
+        }
+        return prev;
+    }
+}
+```
+
 # leetcode 141
 ## 思路
 🧠 思路
@@ -703,13 +738,19 @@ class Solution {
             if (end == null) {
                 break;
             }
+            // 1 - 2 - 3 - 4 - null
+            // start = 1 - 2 - 3 - 4 - null
+            // end = 2 - 3 - 4 - null
             ListNode start = pre.next;
+            // next = 3 - 4 - null
             ListNode next = end.next;
+            // end = 1 - 2 - null
             end.next = null;
-            
+            // pre = dummy - 2 - 1 - null
             pre.next = reverse(start);
+            // start = 2 - 1 - 3 - 4 - null
             start.next = next;
-
+            // pre/end = 1 - 3 - 4 - null
             pre = start;
             end = start;
         }

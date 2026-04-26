@@ -1,3 +1,8 @@
+---
+title: Elasticsearch 分词与倒排索引过程详解
+published: 2026-04-21
+---
+
 # Elasticsearch 分词与倒排索引过程详解
 
   

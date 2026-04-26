@@ -975,14 +975,16 @@ function initTranslate() {
 	
 	// 设置忽略的类名和标签
 	if (siteConfig.translate.ignoreClasses && window.translate) {
+		const translate = window.translate;
 		siteConfig.translate.ignoreClasses.forEach(className => {
-			window.translate.ignore.class.push(className);
+			translate.ignore.class.push(className);
 		});
 	}
 	
 	if (siteConfig.translate.ignoreTags && window.translate) {
+		const translate = window.translate;
 		siteConfig.translate.ignoreTags.forEach(tagName => {
-			window.translate.ignore.tag.push(tagName);
+			translate.ignore.tag.push(tagName);
 		});
 	}
 	
@@ -1062,17 +1064,17 @@ const setup = () => {
 		initCustomScrollbar();
 		
 		// 重新初始化 TOC 组件
-		const tocElement = document.querySelector('table-of-contents');
+		const tocElement = document.querySelector<HTMLElementTagNameMap['table-of-contents']>('table-of-contents');
 		if (tocElement && typeof tocElement.init === 'function') {
 			setTimeout(() => {
-				tocElement.init();
+				tocElement.init?.();
 			}, 100);
 		}
 		
 		// 重新初始化移动端 TOC 组件
 		if (typeof window.mobileTOCInit === 'function') {
 			setTimeout(() => {
-				window.mobileTOCInit();
+				window.mobileTOCInit?.();
 			}, 100);
 		}
 		
@@ -1348,6 +1350,9 @@ if (window.swup) {
 <script>
 // 全局相册功能 - 重构版本
 class GalleryManager {
+	isInitialized = false;
+	clickHandler: ((event: MouseEvent) => void) | null = null;
+
 	constructor() {
 		this.isInitialized = false;
 		this.clickHandler = null;
@@ -1375,7 +1380,7 @@ class GalleryManager {
 
 		// 创建新的点击处理器
 		console.log('Adding click event listener to document');
-		this.clickHandler = (e) => this.handleClick(e);
+		this.clickHandler = (e: MouseEvent) => this.handleClick(e);
 		document.addEventListener('click', this.clickHandler);
 		this.isInitialized = true;
 		console.log('GalleryManager initialized successfully');
@@ -1389,11 +1394,13 @@ class GalleryManager {
 		this.isInitialized = false;
 	}
 
-	handleClick(e) {
+	handleClick(e: MouseEvent) {
 		console.log('GalleryManager handleClick triggered', e.target);
+		const target = e.target;
+		if (!(target instanceof Element)) return;
 		
 		// 处理相册头部点击（展开/折叠）
-		const galleryHeader = e.target.closest('.gallery-header');
+		const galleryHeader = target.closest('.gallery-header');
 		if (galleryHeader) {
 			console.log('Gallery header clicked', galleryHeader);
 			e.preventDefault();
@@ -1403,7 +1410,7 @@ class GalleryManager {
 		}
 
 		// 处理图片点击（查看大图）
-		const galleryImage = e.target.closest('.gallery-image');
+		const galleryImage = target.closest('.gallery-image');
 		if (galleryImage) {
 			console.log('Gallery image clicked', galleryImage);
 			e.preventDefault();
@@ -1415,33 +1422,35 @@ class GalleryManager {
 		}
 	}
 
-	toggleGallery(header) {
+	toggleGallery(header: Element) {
 		console.log('toggleGallery called', header);
 		const group = header.closest('.gallery-group');
-		const content = group.querySelector('.gallery-content');
-		const icon = header.querySelector('.expand-icon');
+		const content = group?.querySelector<HTMLElement>('.gallery-content');
+		const icon = header.querySelector<HTMLElement>('.expand-icon');
+		if (!group || !content) {
+			console.error('Gallery content not found!');
+			return;
+		}
 		
 		console.log('Found elements:', { group, content, icon });
 		console.log('Content hidden?', content?.classList.contains('hidden'));
 
-		if (content && content.classList.contains('hidden')) {
+		if (content.classList.contains('hidden')) {
 			// 展开
 			console.log('Expanding gallery');
 			content.classList.remove('hidden');
 			group.classList.add('expanded');
 			if (icon) icon.style.transform = 'rotate(180deg)';
-		} else if (content) {
+		} else {
 			// 折叠
 			console.log('Collapsing gallery');
 			content.classList.add('hidden');
 			group.classList.remove('expanded');
 			if (icon) icon.style.transform = 'rotate(0deg)';
-		} else {
-			console.error('Gallery content not found!');
 		}
 	}
 
-	showImageModal(imageSrc) {
+	showImageModal(imageSrc: string) {
 		// 创建模态框元素
 		const modal = document.createElement('div');
 		modal.className = 'gallery-modal fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4';
@@ -1493,12 +1502,12 @@ class GalleryManager {
 			}, 300);
 		};
 		
-		const handleEsc = (e) => {
+		const handleEsc = (e: KeyboardEvent) => {
 			if (e.key === 'Escape') closeModal();
 		};
 		
 		closeBtn.addEventListener('click', closeModal);
-		modal.addEventListener('click', (e) => {
+		modal.addEventListener('click', (e: MouseEvent) => {
 			if (e.target === modal) closeModal();
 		});
 		document.addEventListener('keydown', handleEsc);
@@ -1508,16 +1517,17 @@ class GalleryManager {
 }
 
 // 创建全局相册管理器实例
-window.galleryManager = new GalleryManager();
+const galleryManager = new GalleryManager();
+window.galleryManager = galleryManager;
 
 // 相册初始化函数
 const initGallery = () => {
 	console.log('initGallery called');
 	// 在页面切换时，需要重置初始化状态以允许重新初始化
 	if (window.location.pathname.includes('/gallery')) {
-		window.galleryManager.isInitialized = false;
+		galleryManager.isInitialized = false;
 	}
-	window.galleryManager.init();
+	galleryManager.init();
 };
 
 // Swup集成
@@ -1539,7 +1549,7 @@ const setupGalleryWithSwup = () => {
 		window.swup.hooks.on("content:replace", () => {
 			// 页面内容替换前清理
 			console.log('Layout: Swup content:replace - cleaning up gallery');
-			window.galleryManager.cleanup();
+			galleryManager.cleanup();
 		}, { before: true });
 	}
 	

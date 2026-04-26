@@ -157,6 +157,14 @@ export class WidgetManager {
 		return this.config.responsive.breakpoints;
 	}
 
+	getComponentConfig(componentType: WidgetComponentType): WidgetComponentConfig | undefined {
+		return this.config.components.find(component => component.type === componentType);
+	}
+
+	getEnabledComponentTypes(): WidgetComponentType[] {
+		return this.enabledComponents.map(component => component.type);
+	}
+
 	/**
 	 * 更新组件配置
 	 * @param newConfig 新的配置
@@ -223,7 +231,7 @@ export const widgetManager = new WidgetManager();
  * @param componentType 组件类型
  */
 export function getComponentConfig(componentType: WidgetComponentType): WidgetComponentConfig | undefined {
-	return widgetManager.config.components.find(c => c.type === componentType);
+	return widgetManager.getComponentConfig(componentType);
 }
 
 /**
@@ -239,5 +247,5 @@ export function isComponentEnabled(componentType: WidgetComponentType): boolean 
  * 工具函数：获取所有启用的组件类型
  */
 export function getEnabledComponentTypes(): WidgetComponentType[] {
-	return widgetManager.enabledComponents.map(c => c.type);
+	return widgetManager.getEnabledComponentTypes();
 }

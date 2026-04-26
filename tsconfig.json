@@ -3,6 +3,8 @@
 		"target": "ESNext",
 		"module": "ESNext",
 		"moduleResolution": "Node",
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
 		"jsx": "react-jsx",
 		"jsxImportSource": "react",
 		"baseUrl": ".",

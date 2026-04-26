@@ -1,3 +1,8 @@
+---
+title: RocketMQ整体结构详解
+published: 2026-04-21
+---
+
 # RocketMQ整体结构详解
 
 ## 📌 概述
@@ -1563,4 +1568,3 @@ Producer → CommitLog → ConsumeQueue → Consumer → ProcessQueue → Messag
 - **CommitLog**: `store/src/main/java/org/apache/rocketmq/store/CommitLog.java`
 - **MappedFile**: `store/src/main/java/org/apache/rocketmq/store/logfile/DefaultMappedFile.java`
 - **DefaultMessageStore**: `store/src/main/java/org/apache/rocketmq/store/DefaultMessageStore.java`
-
